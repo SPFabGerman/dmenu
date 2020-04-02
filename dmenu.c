@@ -29,7 +29,7 @@
 #define NUMBERSBUFSIZE        (NUMBERSMAXDIGITS * 2) + 1
 
 /* enums */
-enum { SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight, SchemeLast }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight, SchemeBorder, SchemeLast }; /* color schemes */
 
 struct item {
 	char *text;
@@ -751,7 +751,7 @@ setup(void)
 	                    CopyFromParent, CopyFromParent, CopyFromParent,
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
     if (border_width)
-	    XSetWindowBorder(dpy, win, scheme[SchemeSel][ColBg].pixel);
+	    XSetWindowBorder(dpy, win, scheme[SchemeBorder][ColBg].pixel);
 	XSetClassHint(dpy, win, &ch);
 
 
@@ -830,6 +830,11 @@ readxresources(void) {
 			colors[SchemeSelHighlight][ColFg] = strdup(colors[SchemeSelHighlight][ColFg]);
 			colors[SchemeNormHighlight][ColFg] = strdup(colors[SchemeNormHighlight][ColFg]);
         }
+		if (XrmGetResource(xdb, "dmenu.color4", "*", &type, &xval))
+            colors[SchemeBorder][ColBg] = strdup(xval.addr);
+        else
+            colors[SchemeBorder][ColBg] = strdup(colors[SchemeBorder][ColBg]);
+        colors[SchemeBorder][ColFg] = strdup(colors[SchemeBorder][ColFg]);
 
 		XrmDestroyDatabase(xdb);
 	}
