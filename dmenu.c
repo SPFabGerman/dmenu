@@ -798,22 +798,38 @@ readxresources(void) {
 			fonts[0] = strdup(xval.addr);
 		else
 			fonts[0] = strdup(fonts[0]);
-		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval))
+
+		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval)) {
 			colors[SchemeNorm][ColBg] = strdup(xval.addr);
-		else
-			colors[SchemeNorm][ColBg] = strdup(colors[SchemeNorm][ColBg]);
-		if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval))
-			colors[SchemeNorm][ColFg] = strdup(xval.addr);
-		else
-			colors[SchemeNorm][ColFg] = strdup(colors[SchemeNorm][ColFg]);
-		if (XrmGetResource(xdb, "dmenu.selbackground", "*", &type, &xval))
-			colors[SchemeSel][ColBg] = strdup(xval.addr);
-		else
-			colors[SchemeSel][ColBg] = strdup(colors[SchemeSel][ColBg]);
-		if (XrmGetResource(xdb, "dmenu.selforeground", "*", &type, &xval))
 			colors[SchemeSel][ColFg] = strdup(xval.addr);
-		else
+			colors[SchemeNormHighlight][ColBg] = strdup(xval.addr);
+        } else {
+			colors[SchemeNorm][ColBg] = strdup(colors[SchemeNorm][ColBg]);
 			colors[SchemeSel][ColFg] = strdup(colors[SchemeSel][ColFg]);
+			colors[SchemeNormHighlight][ColBg] = strdup(colors[SchemeNormHighlight][ColBg]);
+        }
+        if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval)) {
+			colors[SchemeNorm][ColFg] = strdup(xval.addr);
+			colors[SchemeSel][ColBg] = strdup(xval.addr);
+			colors[SchemeOut][ColFg] = strdup(xval.addr);
+			colors[SchemeSelHighlight][ColBg] = strdup(xval.addr);
+        } else {
+			colors[SchemeNorm][ColFg] = strdup(colors[SchemeNorm][ColFg]);
+			colors[SchemeSel][ColBg] = strdup(colors[SchemeSel][ColBg]);
+			colors[SchemeOut][ColFg] = strdup(colors[SchemeOut][ColFg]);
+			colors[SchemeSelHighlight][ColBg] = strdup(colors[SchemeSelHighlight][ColBg]);
+        }
+		if (XrmGetResource(xdb, "dmenu.color8", "*", &type, &xval))
+			colors[SchemeOut][ColBg] = strdup(xval.addr);
+		else
+			colors[SchemeOut][ColBg] = strdup(colors[SchemeOut][ColBg]);
+		if (XrmGetResource(xdb, "dmenu.color6", "*", &type, &xval)) {
+			colors[SchemeSelHighlight][ColFg] = strdup(xval.addr);
+			colors[SchemeNormHighlight][ColFg] = strdup(xval.addr);
+        } else {
+			colors[SchemeSelHighlight][ColFg] = strdup(colors[SchemeSelHighlight][ColFg]);
+			colors[SchemeNormHighlight][ColFg] = strdup(colors[SchemeNormHighlight][ColFg]);
+        }
 
 		XrmDestroyDatabase(xdb);
 	}
