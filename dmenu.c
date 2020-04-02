@@ -510,8 +510,8 @@ buttonpress(XEvent *e)
 	if (ev->window != win)
 		return;
 
-	/* right-click: exit */
-	if (ev->button == Button3)
+	/* middle-click: exit */
+	if (ev->button == Button2)
 		exit(1);
 
 	if (prompt && *prompt)
@@ -531,8 +531,8 @@ buttonpress(XEvent *e)
 		drawmenu();
 		return;
 	}
-	/* middle-mouse click: paste selection */
-	if (ev->button == Button2) {
+	/* right-click: paste selection */
+	if (ev->button == Button3) {
 		XConvertSelection(dpy, (ev->state & ShiftMask) ? clip : XA_PRIMARY,
 		                  utf8, utf8, win, CurrentTime);
 		drawmenu();
