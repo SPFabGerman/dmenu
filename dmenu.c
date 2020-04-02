@@ -31,6 +31,10 @@
 /* enums */
 enum { SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight, SchemeBorder, SchemeLast }; /* color schemes */
 
+/* Color Scheme Override Protection for Command Line Arguments */
+static short colorOverriden[SchemeOut][2] = { {0,0}, {0,0} };
+static short fontOverriden = 0;
+
 struct item {
 	char *text;
 	struct item *left, *right;
@@ -799,24 +803,30 @@ readxresources(void) {
 		else
 			fonts[0] = strdup(fonts[0]);
 
-		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval)) {
+		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval) && !colorOverriden[SchemeNorm][ColBg]) {
 			colors[SchemeNorm][ColBg] = strdup(xval.addr);
-			colors[SchemeSel][ColFg] = strdup(xval.addr);
 			colors[SchemeNormHighlight][ColBg] = strdup(xval.addr);
         } else {
 			colors[SchemeNorm][ColBg] = strdup(colors[SchemeNorm][ColBg]);
-			colors[SchemeSel][ColFg] = strdup(colors[SchemeSel][ColFg]);
 			colors[SchemeNormHighlight][ColBg] = strdup(colors[SchemeNormHighlight][ColBg]);
         }
-        if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval)) {
+		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval) && !colorOverriden[SchemeSel][ColFg]) {
+			colors[SchemeSel][ColFg] = strdup(xval.addr);
+        } else {
+			colors[SchemeSel][ColFg] = strdup(colors[SchemeSel][ColFg]);
+        }
+        if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeNorm][ColFg]) {
 			colors[SchemeNorm][ColFg] = strdup(xval.addr);
-			colors[SchemeSel][ColBg] = strdup(xval.addr);
 			colors[SchemeOut][ColFg] = strdup(xval.addr);
-			colors[SchemeSelHighlight][ColBg] = strdup(xval.addr);
         } else {
 			colors[SchemeNorm][ColFg] = strdup(colors[SchemeNorm][ColFg]);
-			colors[SchemeSel][ColBg] = strdup(colors[SchemeSel][ColBg]);
 			colors[SchemeOut][ColFg] = strdup(colors[SchemeOut][ColFg]);
+        }
+		if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeSel][ColBg]) {
+			colors[SchemeSel][ColBg] = strdup(xval.addr);
+			colors[SchemeSelHighlight][ColBg] = strdup(xval.addr);
+        } else {
+			colors[SchemeSel][ColBg] = strdup(colors[SchemeSel][ColBg]);
 			colors[SchemeSelHighlight][ColBg] = strdup(colors[SchemeSelHighlight][ColBg]);
         }
 		if (XrmGetResource(xdb, "dmenu.color8", "*", &type, &xval))
@@ -869,17 +879,22 @@ main(int argc, char *argv[])
 			mon = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
 			prompt = argv[++i];
-		else if (!strcmp(argv[i], "-fn"))  /* font or font set */
+		else if (!strcmp(argv[i], "-fn")) { /* font or font set */
 			fonts[0] = argv[++i];
-		else if (!strcmp(argv[i], "-nb"))  /* normal background color */
+            fontOverriden = 1;
+        } else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
 			colors[SchemeNorm][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-nf"))  /* normal foreground color */
+            colorOverriden[SchemeNorm][ColBg] = 1;
+        } else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
 			colors[SchemeNorm][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-sb"))  /* selected background color */
+            colorOverriden[SchemeNorm][ColFg] = 1;
+        } else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
 			colors[SchemeSel][ColBg] = argv[++i];
-		else if (!strcmp(argv[i], "-sf"))  /* selected foreground color */
+            colorOverriden[SchemeSel][ColBg] = 1;
+        } else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
 			colors[SchemeSel][ColFg] = argv[++i];
-		else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+            colorOverriden[SchemeSel][ColFg] = 1;
+        } else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
         else if (!strcmp(argv[i], "-bw"))
             border_width = atoi(argv[++i]); /* border width */
