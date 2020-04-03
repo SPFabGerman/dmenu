@@ -29,3 +29,7 @@ static const char worddelimiters[] = " ";
 
 /* Size of the window border */
 static unsigned int border_width = 0;
+/* Size of the window border in Center / Line Mode.
+ * Is only taken into account if border_width is 0. */
+static unsigned int border_width_center = 2;
+

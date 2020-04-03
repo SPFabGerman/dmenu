@@ -1014,9 +1014,13 @@ main(int argc, char *argv[])
         } else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
         else if (!strcmp(argv[i], "-bw"))
-            border_width = atoi(argv[++i]); /* border width */
+            border_width_center = border_width = atoi(argv[++i]); /* border width */
 		else
 			usage();
+
+    /* Add Border, if centered / lines and not specified otherwise. */
+    if ( (centered || lines) && !border_width ) 
+        border_width = border_width_center;
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
