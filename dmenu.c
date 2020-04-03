@@ -992,7 +992,7 @@ main(int argc, char *argv[])
 		/* these options take one argument */
 		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
 			lines = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-m"))
+		else if (!strcmp(argv[i], "-m")) /* Monitor */
 			mon = atoi(argv[++i]);
 		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
 			prompt = argv[++i];
@@ -1000,20 +1000,20 @@ main(int argc, char *argv[])
 			fonts[0] = argv[++i];
             fontOverriden = 1;
         } else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
-			colors[SchemeNorm][ColBg] = argv[++i];
+			colors[SchemeNormHighlight][ColBg] = colors[SchemeNorm][ColBg] = argv[++i];
             colorOverriden[SchemeNorm][ColBg] = 1;
         } else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
 			colors[SchemeNorm][ColFg] = argv[++i];
             colorOverriden[SchemeNorm][ColFg] = 1;
         } else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
-			colors[SchemeSel][ColBg] = argv[++i];
+			colors[SchemeSelHighlight][ColBg] = colors[SchemeSel][ColBg] = argv[++i];
             colorOverriden[SchemeSel][ColBg] = 1;
         } else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
 			colors[SchemeSel][ColFg] = argv[++i];
             colorOverriden[SchemeSel][ColFg] = 1;
         } else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
-        else if (!strcmp(argv[i], "-bw"))
+        else if (!strcmp(argv[i], "-bw")) /* Border Width */
             border_width_center = border_width = atoi(argv[++i]); /* border width */
 		else
 			usage();
