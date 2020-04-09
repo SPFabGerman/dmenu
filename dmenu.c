@@ -34,6 +34,7 @@ enum { SchemeNorm, SchemeSel, SchemeOut, SchemeNormHighlight, SchemeSelHighlight
 /* Color Scheme Override Protection for Command Line Arguments */
 static short colorOverriden[SchemeOut][2] = { {0,0}, {0,0} };
 static short fontOverriden = 0;
+static short XrdbAvailable = 0;
 
 struct item {
 	char *text;
@@ -793,9 +794,12 @@ setup(void)
 	for (j = 0; j < SchemeLast; j++) {
 		scheme[j] = drw_scm_create(drw, (const char**)colors[j], 2);
 	}
-	for (j = 0; j < SchemeLast; ++j) {
-		for (i = 0; i < 2; ++i)
-			free(colors[j][i]);
+	if (XrdbAvailable) {
+		for (j = 0; j < SchemeLast; ++j) {
+			for (i = 0; i < 2; ++i) {
+				free(colors[j][i]);
+			}
+		}
 	}
 
 	clip = XInternAtom(dpy, "CLIPBOARD",   False);
@@ -911,6 +915,7 @@ readxresources(void) {
 
 	char* xrm;
 	if ((xrm = XResourceManagerString(drw->dpy))) {
+		XrdbAvailable = 1;
 		char *type;
 		XrmDatabase xdb = XrmGetStringDatabase(xrm);
 		XrmValue xval;
@@ -923,29 +928,29 @@ readxresources(void) {
 		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval) && !colorOverriden[SchemeNorm][ColBg]) {
 			colors[SchemeNorm][ColBg] = strdup(xval.addr);
 			colors[SchemeNormHighlight][ColBg] = strdup(xval.addr);
-        } else {
+		} else {
 			colors[SchemeNorm][ColBg] = strdup(colors[SchemeNorm][ColBg]);
 			colors[SchemeNormHighlight][ColBg] = strdup(colors[SchemeNormHighlight][ColBg]);
-        }
+		}
 		if (XrmGetResource(xdb, "dmenu.background", "*", &type, &xval) && !colorOverriden[SchemeSel][ColFg]) {
 			colors[SchemeSel][ColFg] = strdup(xval.addr);
-        } else {
+		} else {
 			colors[SchemeSel][ColFg] = strdup(colors[SchemeSel][ColFg]);
-        }
-        if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeNorm][ColFg]) {
+		}
+		if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeNorm][ColFg]) {
 			colors[SchemeNorm][ColFg] = strdup(xval.addr);
 			colors[SchemeOut][ColFg] = strdup(xval.addr);
-        } else {
+		} else {
 			colors[SchemeNorm][ColFg] = strdup(colors[SchemeNorm][ColFg]);
 			colors[SchemeOut][ColFg] = strdup(colors[SchemeOut][ColFg]);
-        }
+		}
 		if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeSel][ColBg]) {
 			colors[SchemeSel][ColBg] = strdup(xval.addr);
 			colors[SchemeSelHighlight][ColBg] = strdup(xval.addr);
-        } else {
+		} else {
 			colors[SchemeSel][ColBg] = strdup(colors[SchemeSel][ColBg]);
 			colors[SchemeSelHighlight][ColBg] = strdup(colors[SchemeSelHighlight][ColBg]);
-        }
+		}
 		if (XrmGetResource(xdb, "dmenu.color8", "*", &type, &xval))
 			colors[SchemeOut][ColBg] = strdup(xval.addr);
 		else
@@ -953,15 +958,15 @@ readxresources(void) {
 		if (XrmGetResource(xdb, "dmenu.color6", "*", &type, &xval)) {
 			colors[SchemeSelHighlight][ColFg] = strdup(xval.addr);
 			colors[SchemeNormHighlight][ColFg] = strdup(xval.addr);
-        } else {
+		} else {
 			colors[SchemeSelHighlight][ColFg] = strdup(colors[SchemeSelHighlight][ColFg]);
 			colors[SchemeNormHighlight][ColFg] = strdup(colors[SchemeNormHighlight][ColFg]);
-        }
+		}
 		if (XrmGetResource(xdb, "dmenu.color4", "*", &type, &xval))
-            colors[SchemeBorder][ColBg] = strdup(xval.addr);
-        else
-            colors[SchemeBorder][ColBg] = strdup(colors[SchemeBorder][ColBg]);
-        colors[SchemeBorder][ColFg] = strdup(colors[SchemeBorder][ColFg]);
+            		colors[SchemeBorder][ColBg] = strdup(xval.addr);
+        	else
+			colors[SchemeBorder][ColBg] = strdup(colors[SchemeBorder][ColBg]);
+		colors[SchemeBorder][ColFg] = strdup(colors[SchemeBorder][ColFg]);
 
 		XrmDestroyDatabase(xdb);
 	}
@@ -998,29 +1003,29 @@ main(int argc, char *argv[])
 			prompt = argv[++i];
 		else if (!strcmp(argv[i], "-fn")) { /* font or font set */
 			fonts[0] = argv[++i];
-            fontOverriden = 1;
-        } else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
+        		fontOverriden = 1;
+		} else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
 			colors[SchemeNormHighlight][ColBg] = colors[SchemeNorm][ColBg] = argv[++i];
-            colorOverriden[SchemeNorm][ColBg] = 1;
-        } else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
+			colorOverriden[SchemeNorm][ColBg] = 1;
+		} else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
 			colors[SchemeNorm][ColFg] = argv[++i];
-            colorOverriden[SchemeNorm][ColFg] = 1;
-        } else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
+			colorOverriden[SchemeNorm][ColFg] = 1;
+		} else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
 			colors[SchemeSelHighlight][ColBg] = colors[SchemeSel][ColBg] = argv[++i];
-            colorOverriden[SchemeSel][ColBg] = 1;
-        } else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
+			colorOverriden[SchemeSel][ColBg] = 1;
+		} else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
 			colors[SchemeSel][ColFg] = argv[++i];
-            colorOverriden[SchemeSel][ColFg] = 1;
-        } else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+			colorOverriden[SchemeSel][ColFg] = 1;
+		} else if (!strcmp(argv[i], "-w"))   /* embedding window id */
 			embed = argv[++i];
-        else if (!strcmp(argv[i], "-bw")) /* Border Width */
-            border_width_center = border_width = atoi(argv[++i]); /* border width */
+		else if (!strcmp(argv[i], "-bw")) /* Border Width */
+			border_width_center = border_width = atoi(argv[++i]); /* border width */
 		else
 			usage();
 
-    /* Add Border, if centered / lines and not specified otherwise. */
-    if ( (centered || lines) && !border_width ) 
-        border_width = border_width_center;
+	/* Add Border, if centered / lines and not specified otherwise. */
+	if ( (centered || lines) && !border_width ) 
+		border_width = border_width_center;
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
@@ -1038,7 +1043,8 @@ main(int argc, char *argv[])
 	if (!drw_fontset_create(drw, (const char**)fonts, LENGTH(fonts)))
 		die("no fonts could be loaded.");
 
-	free(fonts[0]);
+	if (XrdbAvailable)
+		free(fonts[0]);
 	lrpad = drw->fonts->h;
 
 #ifdef __OpenBSD__
