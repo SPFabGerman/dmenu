@@ -519,9 +519,20 @@ insert:
 			return;
 		/* fallthrough */
 	case XK_Up:
-		if (sel && sel->left && (sel = sel->left)->right == curr) {
-			curr = prev;
-			calcoffsets();
+		if (sel && sel->left) {
+			if ((sel = sel->left)->right == curr) {
+				curr = prev;
+				calcoffsets();
+			}
+		} else if (sel && !sel->left && sel->right) {
+			/* Loop around if possible */
+			do {
+				sel = sel->right;
+				if (sel == next) {
+					curr = next;
+					calcoffsets();
+				}
+			} while (sel->right);
 		}
 		break;
 	case XK_Next:
@@ -555,9 +566,20 @@ insert:
 			return;
 		/* fallthrough */
 	case XK_Down:
-		if (sel && sel->right && (sel = sel->right) == next) {
-			curr = next;
-			calcoffsets();
+		if (sel && sel->right) {
+			if ((sel = sel->right) == next) {
+				curr = next;
+				calcoffsets();
+			}
+		} else if (sel && !sel->right && sel->left) {
+			/* Loop around if possible */
+			do {
+				sel = sel->left;
+				if (sel->right == curr) {
+					curr = prev;
+					calcoffsets();
+				}
+			} while (sel->left);
 		}
 		break;
 	case XK_Tab:
