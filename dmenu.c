@@ -865,7 +865,7 @@ setup(void)
 		} else {
 			x = info[i].x_org;
 			y = info[i].y_org + (topbar ? 0 : info[i].height - mh);
-			mw = info[i].width;
+			mw = info[i].width - 2 * border_width;
 		}
 
 		XFree(info);
@@ -883,7 +883,7 @@ setup(void)
 		} else {
 			x = 0;
 			y = topbar ? 0 : wa.height - mh;
-			mw = wa.width;
+			mw = wa.width - 2 * border_width;
 		}
 	}
 	inputw = MIN(inputw, mw/3);
