@@ -48,6 +48,7 @@ static char *embed;
 static int bh, mw, mh;
 static int inputw = 0, promptw;
 static int lrpad; /* sum of left and right padding */
+static int sely = 0;
 static size_t cursor;
 static struct item *items = NULL;
 static struct item *matches, *matchend;
@@ -177,6 +178,8 @@ drawitem(struct item *item, int x, int y, int w)
 	else
 		drw_setscheme(drw, scheme[SchemeNorm]);
 
+	if (item == sel)
+		sely = y;
 	int r = drw_text(drw, x, y, w, bh, lrpad / 2, item->text, 0);
 	drawhighlights(item, x, y, w);
 	return r;
@@ -378,6 +381,25 @@ movewordedge(int dir)
 	}
 }
 
+void animatesel() {
+	if (!animated || !framecount)
+		return;
+	int time;
+	time  = 0;
+	drw_setscheme(drw, scheme[SchemeSel]);
+	while (time < framecount)
+	{
+		// bottom animation
+		if (sely /* + lineheight */ < mh - 10)
+			drw_rect(drw, 0, sely + (/* lineheight */ - 4), mw, (((double)time/framecount) * (mh - (/* lineheight */ - 4) - sely)), 1, 1);
+		// top animation
+		drw_rect(drw, 0, sely + 4 - (((double)time/framecount) * (sely + 4)), mw, (((double)time/framecount) * sely), 1, 1);
+		drw_map(drw, win, 0, 0, mw, mh);
+		time++;
+		usleep(19000);
+	}
+}
+
 static void
 keypress(XKeyEvent *ev)
 {
@@ -549,6 +571,7 @@ insert:
 		break;
 	case XK_Return:
 	case XK_KP_Enter:
+		animatesel();
 		puts((sel && !(ev->state & ShiftMask)) ? sel->text : text);
 		if (!(ev->state & ControlMask)) {
 			cleanup();
@@ -594,6 +617,68 @@ insert:
 
 draw:
 	drawmenu();
+}
+
+static void
+setselection(XEvent *e)
+{
+	struct item *item;
+	XMotionEvent *ev = &e->xmotion;
+	int x = 0, y = 0, h = bh, w;
+
+	if (ev->window != win)
+		return;
+
+	/* right-click: exit */
+	if (prompt && *prompt)
+		x += promptw;
+
+	/* input field */
+	w = (lines > 0 || !matches) ? mw - x : inputw;
+
+	/* left-click on input: clear input,
+	 * NOTE: if there is no left-arrow the space for < is reserved so
+	 *       add that to the input width */
+
+	if (lines > 0) {
+		/* vertical list: (ctrl)left-click on item */
+		w = mw - x;
+		for (item = curr; item != next; item = item->right) {
+			y += h;
+			if (ev->y >= y && ev->y <= (y + h)) {
+				if (sel == item)
+					return;
+				sel = item;
+				if (sel) {
+					// sel->out = 1;
+					drawmenu();
+				}
+				return;
+			}
+		}
+	} else if (matches) {
+		/* left-click on left arrow */
+		x += inputw;
+		w = TEXTW("<");
+		/* horizontal list: (ctrl)left-click on item */
+		for (item = curr; item != next; item = item->right) {
+			x += w;
+			w = MIN(TEXTW(item->text), mw - x - TEXTW(">"));
+			if (ev->x >= x && ev->x <= x + w) {
+				if (sel == item)
+					return;				
+				sel = item;
+				if (sel) {
+					//sel->out = 1;
+					drawmenu();
+				}
+				return;
+			}
+		}
+		/* left-click on right arrow */
+		w = TEXTW(">");
+		x = mw - w;
+	}
 }
 
 static void
@@ -658,6 +743,7 @@ buttonpress(XEvent *e)
 		for (item = curr; item != next; item = item->right) {
 			y += h;
 			if (ev->y >= y && ev->y <= (y + h)) {
+				animatesel();
 				puts(item->text);
 				if (!(ev->state & ControlMask))
 					exit(0);
@@ -686,6 +772,7 @@ buttonpress(XEvent *e)
 			x += w;
 			w = MIN(TEXTW(item->text), mw - x - TEXTW(">"));
 			if (ev->x >= x && ev->x <= x + w) {
+				animatesel();
 				puts(item->text);
 				if (!(ev->state & ControlMask))
 					exit(0);
@@ -760,11 +847,18 @@ static void
 run(void)
 {
 	XEvent ev;
+	Time lasttime = 0;
 
 	while (!XNextEvent(dpy, &ev)) {
 		if (XFilterEvent(&ev, win))
 			continue;
 		switch(ev.type) {
+		case MotionNotify:
+			if ((ev.xmotion.time - lasttime) <= (1000 / 60))
+				continue;
+			lasttime = ev.xmotion.time;
+			setselection(&ev);
+			break;
 		case DestroyNotify:
 			if (ev.xdestroywindow.window != win)
 				break;
@@ -893,7 +987,7 @@ setup(void)
 	swa.override_redirect = True;
 	swa.background_pixel = scheme[SchemeNorm][ColBg].pixel;
 	swa.event_mask = ExposureMask | KeyPressMask | VisibilityChangeMask |
-	                 ButtonPressMask;
+	                 ButtonPressMask | PointerMotionMask;
 	win = XCreateWindow(dpy, parentwin, x, y, mw, mh, border_width,
 	                    CopyFromParent, CopyFromParent, CopyFromParent,
 	                    CWOverrideRedirect | CWBackPixel | CWEventMask, &swa);
@@ -966,7 +1060,7 @@ readxresources(void) {
 			colors[SchemeNorm][ColFg] = strdup(colors[SchemeNorm][ColFg]);
 			colors[SchemeOut][ColFg] = strdup(colors[SchemeOut][ColFg]);
 		}
-		if (XrmGetResource(xdb, "dmenu.foreground", "*", &type, &xval) && !colorOverriden[SchemeSel][ColBg]) {
+		if (XrmGetResource(xdb, "dmenu.color1", "*", &type, &xval) && !colorOverriden[SchemeSel][ColBg]) {
 			colors[SchemeSel][ColBg] = strdup(xval.addr);
 			colors[SchemeSelHighlight][ColBg] = strdup(xval.addr);
 		} else {
