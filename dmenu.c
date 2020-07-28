@@ -724,14 +724,24 @@ buttonpress(XEvent *e)
 	}
 	/* scroll up */
 	if (ev->button == Button4 && prev) {
-		sel = curr = prev;
+		// sel = curr = prev;
+		if (curr && curr->left) {
+			curr = curr->left;
+			if (sel && sel->left)
+				sel = sel->left;
+		}
 		calcoffsets();
 		drawmenu();
 		return;
 	}
 	/* scroll down */
 	if (ev->button == Button5 && next) {
-		sel = curr = next;
+		// sel = curr = next;
+		if (curr && curr->right) {
+			curr = curr->right;
+			if (sel && sel->right)
+				sel = sel->right;
+		}
 		calcoffsets();
 		drawmenu();
 		return;
