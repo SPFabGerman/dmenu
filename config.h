@@ -5,7 +5,7 @@ static int topbar = 1;                      /* -b  option; if 0, dmenu appears a
 static int centered = 0;                    /* -c option; centers dmenu on screen */
 static int min_width = 500;                    /* minimum width when centered */
 static int animated = 1;
-static int framecount = 7;
+static int framecount = 8;
 /* -fn option overrides fonts[0]; default X11 font or font set */
 static char *fonts[] = {
 	"MesloLGS NF:size=10"

@@ -387,7 +387,7 @@ void animatesel() {
 	int time;
 	time  = 0;
 	drw_setscheme(drw, scheme[SchemeSel]);
-	while (time < framecount)
+	while (time <= framecount)
 	{
 		// bottom animation
 		if (sely /* + lineheight */ < mh - 10)
@@ -396,8 +396,11 @@ void animatesel() {
 		drw_rect(drw, 0, sely + 4 - (((double)time/framecount) * (sely + 4)), mw, (((double)time/framecount) * sely), 1, 1);
 		drw_map(drw, win, 0, 0, mw, mh);
 		time++;
-		usleep(19000);
+		usleep(20000);
 	}
+	drw_rect(drw, 0, sely + 4 - (((double)time/framecount) * (sely + 4)), mw, (((double)time/framecount) * sely), 1, 1);
+	drw_map(drw, win, 0, 0, mw, mh);
+	usleep(20000);
 }
 
 static void
@@ -735,8 +738,8 @@ buttonpress(XEvent *e)
 	}
 	if (ev->button != Button1)
 		return;
-	if (ev->state & ~ControlMask)
-		return;
+	// if (ev->state & ~ControlMask)
+	// 	return;
 	if (lines > 0) {
 		/* vertical list: (ctrl)left-click on item */
 		w = mw - x;
