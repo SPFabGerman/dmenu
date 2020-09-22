@@ -4,7 +4,7 @@
 static int topbar = 1;                      /* -b  option; if 0, dmenu appears at bottom     */
 static int centered = 1;                    /* -c option; centers dmenu on screen */
 static int managed = 1;
-static int min_width = 0;                    /* minimum width when centered */
+static int min_width = 100;                    /* minimum width when centered */
 static int animated = 1;
 static int framecount = 8;
 /* -fn option overrides fonts[0]; default X11 font or font set */
