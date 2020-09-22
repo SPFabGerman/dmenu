@@ -54,7 +54,6 @@ static struct item *items = NULL;
 static struct item *matches, *matchend;
 static struct item *prev, *curr, *next, *sel;
 static int mon = -1, screen;
-static int managed = 0;
 
 static Atom clip, utf8;
 static Display *dpy;
@@ -1016,6 +1015,20 @@ setup(void)
 
 	xic = XCreateIC(xim, XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
 	                XNClientWindow, win, XNFocusWindow, win, NULL);
+
+	if (managed) {
+		// XSetTransientForHint(dpy, win, root);
+		XSizeHints * size = XAllocSizeHints();
+		if (size == NULL)
+			die("Size Hints: Not enough memory.");
+
+		size->flags = PMinSize | PMaxSize | PBaseSize;
+		size->min_width = size->max_width = size->base_width = mw;
+		size->min_height = size->max_height = size->base_height = mh;
+		
+		XSetWMNormalHints(dpy, win, size);
+		XFree(size);
+	}
 
 	XMapRaised(dpy, win);
 
