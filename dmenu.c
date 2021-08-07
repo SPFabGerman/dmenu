@@ -1138,47 +1138,55 @@ main(int argc, char *argv[])
 		if (!strcmp(argv[i], "-v")) {      /* prints version information */
 			puts("dmenu-"VERSION);
 			exit(0);
-		} else if (!strcmp(argv[i], "-b")) /* appears at the bottom of the screen */
+		} else if (!strcmp(argv[i], "-b")) { /* appears at the bottom of the screen */
 			topbar = 0;
-		else if (!strcmp(argv[i], "-f"))   /* grabs keyboard before reading stdin */
+		} else if (!strcmp(argv[i], "+b")) { /* appears at the top of the screen */
+			topbar = 1;
+		} else if (!strcmp(argv[i], "-f")) { /* grabs keyboard before reading stdin */
 			fast = 1;
-		else if (!strcmp(argv[i], "-c"))   /* centers dmenu on screen */
+		} else if (!strcmp(argv[i], "-c")) { /* centers dmenu on screen */
 			centered = 1;
-		else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
+		} else if (!strcmp(argv[i], "+c")) { /* don't center dmenu on screen */
+			centered = 0;
+		} else if (!strcmp(argv[i], "-i")) { /* case-insensitive item matching */
 			fstrncmp = strncasecmp;
 			fstrstr = cistrstr;
 		} else if (!strcmp(argv[i], "-wm")) { /* display as managed wm window */
 			managed = 1;
-		} else if (i + 1 == argc)
+		} else if (!strcmp(argv[i], "+wm")) { /* display as unmanaged wm window */
+			managed = 0;
+		} else if (i + 1 == argc) {
 			usage();
+		}
 		/* these options take one argument */
-		else if (!strcmp(argv[i], "-l"))   /* number of lines in vertical list */
+		else if (!strcmp(argv[i], "-l")) { /* number of lines in vertical list */
 			lines = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-m")) /* Monitor */
+		} else if (!strcmp(argv[i], "-m")) { /* Monitor */
 			mon = atoi(argv[++i]);
-		else if (!strcmp(argv[i], "-p"))   /* adds prompt to left of input field */
+		} else if (!strcmp(argv[i], "-p")) { /* adds prompt to left of input field */
 			prompt = argv[++i];
-		else if (!strcmp(argv[i], "-fn")) { /* font or font set */
+		} else if (!strcmp(argv[i], "-fn")) { /* font or font set */
 			fonts[0] = argv[++i];
         		fontOverriden = 1;
-		} else if (!strcmp(argv[i], "-nb")) {  /* normal background color */
+		} else if (!strcmp(argv[i], "-nb")) { /* normal background color */
 			colors[SchemeNormHighlight][ColBg] = colors[SchemeNorm][ColBg] = argv[++i];
 			colorOverriden[SchemeNorm][ColBg] = 1;
-		} else if (!strcmp(argv[i], "-nf")) {  /* normal foreground color */
+		} else if (!strcmp(argv[i], "-nf")) { /* normal foreground color */
 			colors[SchemeNorm][ColFg] = argv[++i];
 			colorOverriden[SchemeNorm][ColFg] = 1;
-		} else if (!strcmp(argv[i], "-sb")) {  /* selected background color */
+		} else if (!strcmp(argv[i], "-sb")) { /* selected background color */
 			colors[SchemeSelHighlight][ColBg] = colors[SchemeSel][ColBg] = argv[++i];
 			colorOverriden[SchemeSel][ColBg] = 1;
-		} else if (!strcmp(argv[i], "-sf")) {  /* selected foreground color */
+		} else if (!strcmp(argv[i], "-sf")) { /* selected foreground color */
 			colors[SchemeSel][ColFg] = argv[++i];
 			colorOverriden[SchemeSel][ColFg] = 1;
-		} else if (!strcmp(argv[i], "-w"))   /* embedding window id */
+		} else if (!strcmp(argv[i], "-w")) { /* embedding window id */
 			embed = argv[++i];
-		else if (!strcmp(argv[i], "-bw")) /* Border Width */
-			border_width_center = border_width = atoi(argv[++i]); /* border width */
-		else
+		} else if (!strcmp(argv[i], "-bw")) { /* Border Width */
+			border_width_center = border_width = atoi(argv[++i]);
+		} else {
 			usage();
+		}
 
 	/* Add Border, if centered / lines and not specified otherwise. */
 	if ( (centered || lines) && !border_width ) 
